@@ -1,0 +1,23 @@
+{
+  "name": "simple-ranker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.js",
+  "bin": "./dist/index.js",
+  "scripts": {
+    "start": "nodemon ./src/index.ts",
+    "compile": "tsc && pkg --out-path ./bin ./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/node": "^18.15.3",
+    "nodemon": "^2.0.21",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  }
+}
