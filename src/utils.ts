@@ -1,27 +1,39 @@
 import { createReadStream } from "fs";
 
-export const getCharacters = (input: string) => [...new Set(input)];
+const removeDuplicates = (input: string | string[]) => [...new Set(input)];
 
-export const getWords = (input: string) => [
-  ...new Set(input.trim().split(" ")),
-];
+export const getCharacters = (input: string) => removeDuplicates(input);
 
-export const getOccurance = (sample: string, input: string) =>
-  input.split(sample).length - 1;
+export const getWords = (input: string) => {
+  const words = input.trim().split(" ");
+  return removeDuplicates(words);
+};
 
-export const handleStream = async (
-  filePath: string,
-  callback: (data: string) => void
-) =>
-  new Promise<void>((resolve) => {
-    const stream = createReadStream(filePath, { encoding: "utf8" });
+export const getOccurances = (samples: string[]) =>
+  samples.reduce<Record<string, number>>(
+    (accumulator, currentValue) => ({
+      ...accumulator,
+      [currentValue]: accumulator[currentValue] || 0,
+    }),
+    {}
+  );
+// Object.fromEntries(
+//   samples.map((sample) => [sample, input.split(sample).length - 1])
+// );
 
-    stream.on("data", (data) => {
-      callback(data.toString() ?? data);
+export const getData = (filePath: string) => {
+  let data = "";
+
+  return new Promise<string>((resolve) => {
+    const stream = createReadStream(filePath);
+
+    stream.on("data", (chunk) => {
+      data = `${data}${chunk.toString()}`;
+    });
+
+    stream.on("close", () => {
+      resolve(data);
       stream.destroy();
     });
-
-    stream.on("end", () => {
-      resolve();
-    });
   });
+};
