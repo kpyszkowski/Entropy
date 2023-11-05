@@ -1,8 +1,15 @@
 export interface Results {
   fileName: string;
-  data: string;
-  characters: string[];
-  words: string[];
-  characterOccurances?: Record<string, number>;
-  wordOccurances?: Record<string, number>;
+  wordsEntropy: number;
+  charactersEntropy: number;
+  wordsConditionalEntropy: number[];
+  charactersConditionalEntropy: number[];
+}
+
+export type Occurances = Map<string, number>;
+
+export interface GetConditionalEntropyOptions {
+  data: string | string[];
+  maxDepth?: number;
+  scope?: "characters" | "words";
 }

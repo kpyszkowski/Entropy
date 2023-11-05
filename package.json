@@ -1,24 +1,24 @@
 {
-  "name": "entropy",
+  "name": "entropy-analyzer",
   "version": "1.0.0",
   "description": "",
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
   "scripts": {
-    "start": "nodemon -r dotenv/config ./src/index.ts",
-    "compile": "tsc && pkg --out-path ./bin ./dist/src/index.js"
+    "start": "nodemon ./src/index.ts --data=data",
+    "compile": "rimraf dist && tsc && caxa '{{caxa}}/node_modules/.bin/node' '{{caxa}}/index.js' --input './dist' --output './entropy-analyzer'"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@types/node": "^20.8.9",
-    "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1",
     "typescript": "^5.2.2"
   },
   "devDependencies": {
-    "dotenv": "^16.3.1",
-    "pkg": "^5.8.1"
+    "@types/node": "^20.8.9",
+    "caxa": "^3.0.1",
+    "nodemon": "^3.0.1",
+    "rimraf": "^5.0.5",
+    "ts-node": "^10.9.1"
   }
 }

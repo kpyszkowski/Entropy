@@ -1,1 +1,1 @@
-# Entropy
+# Entropy Analyzer
