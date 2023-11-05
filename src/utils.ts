@@ -25,16 +25,16 @@ export const getData = (filePath: string) => {
 };
 
 export const getEntropy = (occurances: Occurances, totalCount: number) =>
-  Array.from(occurances.values()).reduce((acc, count) => {
+  -Array.from(occurances.values()).reduce((acc, count) => {
     const probability = count / totalCount;
-    return acc + probability * -Math.log2(probability);
+    return acc + probability * Math.log2(probability);
   }, 0);
 
 const getFormattedConditionalEntropy = (data: number[]) =>
   data
     .map((entropy, index) => {
       const depth = index + 1;
-      return `     - Depth ${depth}: ${entropy}`;
+      return `    - Depth ${depth}: ${entropy}`;
     })
     .join("\n");
 
@@ -59,12 +59,12 @@ export const parseResults = (results: Results[]) =>
           getFormattedConditionalEntropy(charactersConditionalEntropy);
 
         return (
-          `📄 Processed ${fileName}:\n` +
-          `   - Words entropy:      ${wordsEntropy}\n` +
-          `   - Characters entropy: ${charactersEntropy}\n` +
-          `   - Words conditional entropy:\n` +
+          `Processed ${fileName}:\n` +
+          `  - Words entropy:      ${wordsEntropy}\n` +
+          `  - Characters entropy: ${charactersEntropy}\n` +
+          `  - Words conditional entropy:\n` +
           `${formattedWordsConditionalEntropy}\n` +
-          `   - Characters conditional entropy:\n` +
+          `  - Characters conditional entropy:\n` +
           `${formattedCharactersConditionalEntropy}\n` +
           `\n${acc}`
         );
@@ -79,50 +79,55 @@ export const getConditionalEntropy = (
   const { maxDepth = 1, scope = "characters" } = options;
   let { data } = options;
 
-  const dictionary: Record<string, Record<string, number>> = {};
+  const dictionary: Map<string, Map<string, number>> = new Map();
   let possibleCount = 0;
 
-  if (scope === "words") {
-    data = (data as string).split(" ");
-  }
+  const dataArray = scope === "words" ? data.split(" ") : undefined;
 
   for (let i = 0; i < data.length; i++) {
     const currentDepth = i + maxDepth;
 
     if (currentDepth < data.length) {
-      const currentSample = `"${
-        scope === "words"
-          ? (data.slice(i, currentDepth) as []).join("_")
-          : (data as string).substring(i, currentDepth)
-      }"`;
-      const nextSample = `"${data[currentDepth]}"`;
+      const currentSample =
+        dataArray?.slice(i, currentDepth).join("_") ??
+        data.substring(i, currentDepth);
+      const nextSample = (dataArray ?? data)[currentDepth];
 
-      const isCurrentSampleInDictionary = currentSample in dictionary;
+      const isCurrentSampleInDictionary = dictionary.has(currentSample);
 
       if (!isCurrentSampleInDictionary) {
-        dictionary[currentSample] = {};
+        dictionary.set(currentSample, new Map());
       }
 
-      dictionary[currentSample][nextSample] =
-        (dictionary[currentSample][nextSample] ?? 0) + 1;
+      // Non-null assertion is safe here: the dictionary is guaranteed to exist (line 99)
+      const currentSampleDictionary = dictionary.get(currentSample)!;
+      const existingNextSampleFactor = currentSampleDictionary.get(nextSample);
+
+      currentSampleDictionary.set(
+        nextSample,
+        (existingNextSampleFactor ?? 0) + 1
+      );
 
       possibleCount++;
     }
   }
-  return -Object.values(dictionary).reduce((acc, nextSampleDictionary) => {
-    const nextSampleFactors = Object.values(nextSampleDictionary);
-    const nextSampleSummaryFactor = nextSampleFactors.reduce(
-      (sum, currentFactor) => sum + currentFactor,
-      0
-    );
+  return -Array.from(dictionary.values()).reduce(
+    (acc, nextSampleDictionary) => {
+      const nextSampleFactors = Array.from(nextSampleDictionary.values());
+      const nextSampleSummaryFactor = nextSampleFactors.reduce(
+        (sum, currentFactor) => sum + currentFactor,
+        0
+      );
 
-    const reduced = nextSampleFactors.reduce(
-      (letterAcc, val) =>
-        letterAcc +
-        (val / possibleCount) * Math.log2(val / nextSampleSummaryFactor),
-      0
-    );
+      const reduced = nextSampleFactors.reduce(
+        (letterAcc, val) =>
+          letterAcc +
+          (val / possibleCount) * Math.log2(val / nextSampleSummaryFactor),
+        0
+      );
 
-    return acc + reduced;
-  }, 0);
+      return acc + reduced;
+    },
+    0
+  );
 };

@@ -9,7 +9,7 @@ export interface Results {
 export type Occurances = Map<string, number>;
 
 export interface GetConditionalEntropyOptions {
-  data: string | string[];
+  data: string;
   maxDepth?: number;
   scope?: "characters" | "words";
 }

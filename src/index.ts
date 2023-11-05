@@ -23,10 +23,11 @@ async function main() {
     console.log(
       "Etropy Analyzer\n" +
         "\n" +
-        "Usage: entropy-analyzer --data=<path>\n" +
+        "Usage: ./entropy-analyzer --data=<path> --depth=<number>\n" +
         "Options:\n" +
-        "  --help, -h     Show this help message\n" +
-        "  --data=<path>  Specify the location of the data to be processed\n"
+        "  --data=<path>      [Required] Specify the location of the data to be processed\n" +
+        "  --depth=<number>   [Required] Specify the maximum depth of conditional entropy calculations\n" +
+        "  --help, -h         Show this help message\n"
     );
     return;
   }
@@ -38,7 +39,6 @@ async function main() {
     console.log("❌: Please specify a data location using --data=<path>");
     return;
   }
-
   const dataPath = resolvePath(
     isPathAbsolute(dataLocation) ? "" : "./",
     dataLocation
@@ -47,8 +47,18 @@ async function main() {
     console.log(`❌: Specified data location is invalid (${dataPath})`);
     return;
   }
-
   const fileNames = await readDir(dataPath);
+  console.log(`📂: Found ${fileNames.length} files in ${dataPath}`);
+
+  const depth = Number(
+    args.find((arg) => arg.startsWith("--depth="))?.slice(8)
+  );
+  if (isNaN(depth)) {
+    console.log("❌: Please specify a valid depth using --depth=<number>");
+    return;
+  }
+  console.log(`🔄: Specified conditional entropy depth: ${depth}\n`);
+
   let results: Results[] = [];
 
   for (const fileName of fileNames) {
@@ -71,7 +81,7 @@ async function main() {
     );
 
     let wordsConditionalEntropy: number[] = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= depth; i++) {
       const entropy = getConditionalEntropy({
         data,
         maxDepth: i,
@@ -81,7 +91,7 @@ async function main() {
     }
 
     let charactersConditionalEntropy: number[] = [];
-    for (let i = 1; i <= 5; i++) {
+    for (let i = 1; i <= depth; i++) {
       const entropy = getConditionalEntropy({
         data,
         maxDepth: i,
@@ -98,7 +108,7 @@ async function main() {
     });
   }
 
-  console.log("\n✅: Finished processing files\n");
+  console.log("\n✅: Finished processing files");
   console.log(parseResults(results));
 }
 

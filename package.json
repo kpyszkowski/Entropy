@@ -5,7 +5,7 @@
   "main": "./dist/index.js",
   "bin": "./dist/index.js",
   "scripts": {
-    "start": "nodemon ./src/index.ts --data=data",
+    "start": "nodemon ./src/index.ts --data=data --depth=2",
     "compile": "rimraf dist && tsc && caxa '{{caxa}}/node_modules/.bin/node' '{{caxa}}/index.js' --input './dist' --output './entropy-analyzer'"
   },
   "keywords": [],
